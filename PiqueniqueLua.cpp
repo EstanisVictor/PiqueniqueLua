@@ -2,37 +2,37 @@
 #include <conio.h>
 using namespace std;
 
-void escritaArquivo(FILE *arquivo, int count, char palavra[], char simNao[])
+void writeFile(FILE *file, int count, char word[], char yesOrNot[])
 {
-    if (arquivo == NULL)
+    if (file == NULL)
     {
-        puts("Arquivo nao pode ser aberto...");
+        puts("File cannot be opened...");
         return;
     }
 
-    fprintf(arquivo, "Tentativa: %i %s", count, "\n");
+    fprintf(file, "Tentativa: %i %s", count, "\n");
 
-    fprintf(arquivo, " Palavra Tentada: %s%s", palavra, "\n");
+    fprintf(file, " Palavra Tentada: %s%s", word, "\n");
 
-    fprintf(arquivo, " Palavra Aceita? %c%c%c%s", simNao[0], simNao[1], simNao[2], "\n");
+    fprintf(file, " Palavra Aceita? %c%c%c%s", yesOrNot[0], yesOrNot[1], yesOrNot[2], "\n");
 }
 
-void addAcertos(FILE *arquivo, char palavra[])
+void addHits(FILE *file, char word[])
 {
-    if (arquivo == NULL)
+    if (file == NULL)
     {
-        puts("Arquivo nao pode ser aberto...");
+        puts("File cannot be opened...");
         return;
     }
 
-    fprintf(arquivo, "%s", palavra);
+    fprintf(file, "%s", word);
 }
 
-void leituraArquivo(FILE *arquivo)
+void readFile(FILE *file)
 {
     char line[150];
     cout << "----------Historico de tentativas----------" << endl;
-    while ((fgets(line, sizeof(line), arquivo)) != NULL)
+    while ((fgets(line, sizeof(line), file)) != NULL)
     {
         printf("%s", line);
     }
@@ -40,29 +40,29 @@ void leituraArquivo(FILE *arquivo)
     cout << "-------------------------------------------" << endl;
 }
 
-typedef struct sTentativa
+typedef struct sTry
 {
-    char palavra[100];
-    char simouNao[5];
-} tentativa;
+    char word[100];
+    char yesOrNot[5];
+} attempt;
 
-int validaPalavra(char palavra[], char anterior)
+int checkWord(char word[], char previous)
 {
-    int tam = strlen(palavra);
+    int size = strlen(word);
 
-    if (tam <= 10)
+    if (size <= 10)
     {
         return 1;
     }
-    else if (palavra[0] == 'a' || palavra[0] == 'A')
+    else if (word[0] == 'a' || word[0] == 'A')
     {
         return 1;
     }
-    else if (palavra[tam - 1] == 'r' || palavra[tam - 1] == 'R')
+    else if (word[size - 1] == 'r' || word[size - 1] == 'R')
     {
         return 1;
     }
-    else if (palavra[0] == anterior)
+    else if (word[0] == previous)
     {
         return 1;
     }
@@ -72,15 +72,15 @@ int validaPalavra(char palavra[], char anterior)
     }
 }
 
-int verificaRepetidas(FILE *arquivo, char palavra[])
+int checkForMatchingWords(FILE *file, char word[])
 {
-    arquivo = fopen("acertos.txt", "r");
-    strcat(palavra, "\n");
+    file = fopen("acertos.txt", "r");
+    strcat(word, "\n");
 
     char line[150];
-    while ((fgets(line, sizeof(line), arquivo)) != NULL)
+    while ((fgets(line, sizeof(line), file)) != NULL)
     {
-        int value = strcmp(palavra, line);
+        int value = strcmp(word, line);
 
         if (value == 0)
         {
@@ -93,27 +93,27 @@ int verificaRepetidas(FILE *arquivo, char palavra[])
 int main()
 {
 
-    FILE *arq_historico;
-    FILE *arq_acertos;
+    FILE *history_FILE;
+    FILE *hits_FILE;
 
-    int acertosSeguidos = 0;
-    bool verify = true;
-    int countTentativa = 0;
+    int hitSequence = 0;
+    bool verify = false;
+    int countTry = 0;
 
-    cout << "Bem vindo ao Piquinique na Lua!" << endl;
+    cout << "Bem vindo ao Piquenique na Lua!" << endl;
     cout << "Antes de tudo, digite seu nome: ";
 
-    arq_historico = fopen("historico.txt", "wt");
-    arq_acertos = fopen("acertos.txt", "wt");
+    history_FILE = fopen("historico.txt", "wt");
+    hits_FILE = fopen("acertos.txt", "wt");
 
-    char nome[10];
-    cin >> nome;
+    char name[10];
+    cin >> name;
 
-    fprintf(arq_acertos, "%s%s", nome, "\n");
-    fprintf(arq_historico, "%s%s", nome, "\n");
+    fprintf(hits_FILE, "%s%s", name, "\n");
+    fprintf(history_FILE, "%s%s", name, "\n");
 
-    fclose(arq_historico);
-    fclose(arq_acertos);
+    fclose(history_FILE);
+    fclose(hits_FILE);
 
     cout << "--------------------------------------------------" << endl;
     cout << "Ola, vamos comecar a jogar.\n"
@@ -121,67 +121,78 @@ int main()
     cout << "Digite 'q' para sair, ou 'h' para consultar o historico de tentativas." << endl;
     cout << "Vc tem direito de errar 30 vezes. Caso acerte 5 vezes seguidas, sera considerado vencedor!\n";
     cout << "--------------------------------------------------" << endl;
-    char anterior = ' ';
+    char previous = ' ';
 
-    while (countTentativa <= 30)
+    while (countTry <= 30)
     {
-        if (acertosSeguidos == 5)
+        if (hitSequence == 5)
         {
             cout << "VENCEDOR!!!" << endl;
             break;
         }
 
         cout << "-->Digite uma palavra: ";
-        tentativa t;
-        cin >> t.palavra;
+        attempt t;
+        cin >> t.word;
 
-        if (t.palavra[0] == 'q' && strlen(t.palavra) == 1)
+        if (t.word[0] == 'q' && strlen(t.word) == 1)
         {
             break;
         }
 
-        if (t.palavra[0] == 'h' && strlen(t.palavra) == 1)
+        if (t.word[0] == 'h' && strlen(t.word) == 1)
         {
-            arq_historico = fopen("historico.txt", "r");
-            leituraArquivo(arq_historico);
-            fclose(arq_historico);
-            countTentativa--;
+            history_FILE = fopen("historico.txt", "r");
+            readFile(history_FILE);
+            fclose(history_FILE);
+            countTry--;
         }
         else
         {
-            if (validaPalavra(t.palavra, anterior) == 1)
+            if (checkWord(t.word, previous) == 1)
             {
-                cout << "PARABENS! Voce pode levar " << t.palavra << " para o piqueniue!" << endl;
-                acertosSeguidos++;
+                cout << "PARABENS! Voce pode levar " << t.word << " para o piquenique!" << endl;
+                hitSequence++;
 
-                if (verificaRepetidas(arq_acertos, t.palavra) == 0)
+                if (checkForMatchingWords(hits_FILE, t.word) == 0)
                 {
-                    arq_acertos = fopen("acertos.txt", "a");
-                    addAcertos(arq_acertos, t.palavra);
-                    fclose(arq_acertos);
+                    hits_FILE = fopen("acertos.txt", "a");
+                    addHits(hits_FILE, t.word);
+                    fclose(hits_FILE);
                 }
-
-                t.simouNao[0] = 's';
-                t.simouNao[1] = 'i';
-                t.simouNao[2] = 'm';
+                verify = true;
+                t.yesOrNot[0] = 's';
+                t.yesOrNot[1] = 'i';
+                t.yesOrNot[2] = 'm';
             }
             else
             {
-                cout << "Voce nao pode levar " << t.palavra << " para o piqueniue!" << endl;
-                cout << "Voce tem mais " << (30 - countTentativa) << " tentativas" << endl;
-                acertosSeguidos = 0;
-                t.simouNao[0] = 'n';
-                t.simouNao[1] = 'a';
-                t.simouNao[2] = 'o';
+                cout << "Voce nao pode levar " << t.word << " para o piquenique!" << endl;
+                cout << "Voce tem mais " << (30 - countTry) << " tentativas" << endl;
+                hitSequence = 0;
+                t.yesOrNot[0] = 'n';
+                t.yesOrNot[1] = 'a';
+                t.yesOrNot[2] = 'o';
             }
         }
 
-        arq_historico = fopen("historico.txt", "a");
-        escritaArquivo(arq_historico, countTentativa, t.palavra, t.simouNao);
-        fclose(arq_historico);
+        history_FILE = fopen("historico.txt", "a");
+        if (verify)
+        {
+            int size = strlen(t.word);
+            t.word[size - 1] = '\0';
+            writeFile(history_FILE, countTry, t.word, t.yesOrNot);
+            fclose(history_FILE);
+        }
+        else
+        {
+            writeFile(history_FILE, countTry, t.word, t.yesOrNot);
+            fclose(history_FILE);
+        }
 
-        anterior = t.palavra[strlen(t.palavra) - 1];
-        countTentativa++;
+        previous = t.word[strlen(t.word) - 1];
+        countTry++;
+        verify = false;
     }
 
     return 0;
