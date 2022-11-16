@@ -46,11 +46,16 @@ typedef struct sTry
     char yesOrNot[5];
 } attempt;
 
-int checkWord(char word[], char previous)
+int checkWord(char word[], char previous, char first)
 {
     int size = strlen(word);
 
-    if (size <= 10)
+    // new rule
+    if (word[0] == first)
+    {
+        return 1;
+    }
+    else if (size <= 10)
     {
         return 1;
     }
@@ -108,6 +113,7 @@ int main()
 
     char name[10];
     cin >> name;
+    char first = name[0];
 
     fprintf(hits_FILE, "%s%s", name, "\n");
     fprintf(history_FILE, "%s%s", name, "\n");
@@ -149,7 +155,7 @@ int main()
         }
         else
         {
-            if (checkWord(t.word, previous) == 1)
+            if (checkWord(t.word, previous, first) == 1)
             {
                 cout << "PARABENS! Voce pode levar " << t.word << " para o piquenique!" << endl;
                 hitSequence++;
